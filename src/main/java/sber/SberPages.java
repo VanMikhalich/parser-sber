@@ -10,11 +10,11 @@ import org.openqa.selenium.edge.EdgeDriver;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SberApp {
+public class SberPages {
 
 
     private static final String URL = "https://megamarket.ru/catalog/oborudovanie-dlya-umnogo-doma/page-";
-    private static final String MAIN_URL = "https://megamarket.ru";
+    private static final int COUNT_OF_PAGES = 10;
 
 
     public static void main(String[] args) throws InterruptedException {
@@ -22,7 +22,7 @@ public class SberApp {
         WebDriver driver = new EdgeDriver();
         Map<String, Double> benefitMap = new HashMap<>();
 
-        for (int i = 1; i < 20; i++) {
+        for (int i = 1; i < COUNT_OF_PAGES; i++) {
 
             driver.get(URL + i);
             Thread.sleep(5000);
@@ -41,7 +41,7 @@ public class SberApp {
                     Element priceElement = productItem.selectFirst("span[data-test='product-price']");
 
                     if (linkElement != null && priceElement != null) {
-                        String href = MAIN_URL + linkElement.attr("href");
+                        String href = URL + linkElement.attr("href");
                         String priceStr = priceElement.text().replaceAll("[^\\d]", "");
                         double price = Double.parseDouble(priceStr);
 
