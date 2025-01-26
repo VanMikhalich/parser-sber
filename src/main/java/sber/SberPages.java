@@ -12,15 +12,19 @@ import java.util.stream.Collectors;
 
 public class SberPages {
 
+    private static final String NOTEBOOK = "https://megamarket.ru/catalog/noutbuki/page-";
+    private static final String IPHONE = "https://megamarket.ru/catalog/smartfony-apple/page-";
 
-    private static final String URL = "https://megamarket.ru/catalog/oborudovanie-dlya-umnogo-doma/page-";
-    private static final int COUNT_OF_PAGES = 10;
+
+    private static final String MAIN_URL = "https://megamarket.ru";
+    private static final String URL = "https://megamarket.ru/catalog/smartfony-apple/page-";
+    private static final int COUNT_OF_PAGES = 2;
 
 
     public static void main(String[] args) throws InterruptedException {
         System.setProperty("webdriver.edge.driver", "selenium\\msedgedriver.exe");
         WebDriver driver = new EdgeDriver();
-        Map<String, Double> benefitMap = new HashMap<>();
+        Map<String, Product> benefitMap = new HashMap<>();
 
         for (int i = 1; i < COUNT_OF_PAGES; i++) {
 
@@ -41,25 +45,30 @@ public class SberPages {
                     Element priceElement = productItem.selectFirst("span[data-test='product-price']");
 
                     if (linkElement != null && priceElement != null) {
-                        String href = URL + linkElement.attr("href");
+                        String href = MAIN_URL + linkElement.attr("href");
                         String priceStr = priceElement.text().replaceAll("[^\\d]", "");
+
+                        Product product = new Product();
+
                         double price = Double.parseDouble(priceStr);
+                        product.setPrice(price);
 
                         double benefit = Math.round((bonusAmount / price) * 100);
-                        benefitMap.put(href, benefit);
+                        product.setBenefit(benefit);
+                        benefitMap.put(href, product);
                     }
                 }
             }
         }
         driver.quit();
-        sortMap(benefitMap).forEach((href, benefit) -> {
-            System.out.println("Ссылка на товар: " + href + " Выгода: " + benefit + "%");
+        sortMap(benefitMap).forEach((href, product) -> {
+            System.out.println("Ссылка на товар: " + href + "; Выгода: " + product.getBenefit() + "%; " + "Цена: " + product.getPrice() + "₽");
         });
     }
-    static Map<String, Double> sortMap(Map<String, Double> map) {
+    static Map<String, Product> sortMap(Map<String, Product> map) {
         return map.entrySet()
                 .stream()
-                .sorted(Map.Entry.<String, Double>comparingByValue(Comparator.reverseOrder()))
+                .sorted(Map.Entry.<String, Product>comparingByValue(Comparator.comparing(Product::getBenefit).reversed()))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
